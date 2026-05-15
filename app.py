@@ -33,7 +33,8 @@ st.set_page_config(page_title="End-to-End Talent AI", page_icon="📝", layout="
 # ==========================================
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = "http://localhost:8501/"
+# Dynamically uses the cloud secret URL if deployed, otherwise defaults to local machine address
+REDIRECT_URI = os.getenv("REDIRECT_URI", "http://localhost:8501/")
 
 if not CLIENT_ID or not CLIENT_SECRET:
     st.error("📋 System Configuration Missing")
