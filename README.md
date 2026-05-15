@@ -64,8 +64,7 @@ This platform bridges the gap by introducing a **stateful AI workforce**. Powere
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/yourusername/ai-recruitment-agent.git](https://github.com/yourusername/ai-recruitment-agent.git)
-    cd ai-recruitment-agent
+    git clone https://github.com/AraKrizz/Hrass.git
     ```
 
 2.  **Set up a virtual environment:**
