@@ -4,6 +4,7 @@ import re
 import json
 import time
 import requests
+import uuid
 import imaplib
 import email
 import urllib.parse
@@ -171,10 +172,10 @@ def send_omium_telemetry(stage_name, latency_ms=0, status="completed"):
         return
         
     # Official endpoint path targeting active execution streams
-    OMIUM_INGRESS_URL = "https://api.omium.ai/v1/executions"
+    OMIUM_INGRESS_URL = "https://api.omium.ai/api/v1/executions"
     
     headers = {
-        "Authorization": f"Bearer {token}",
+        "X-API-Key": token,
         "Content-Type": "application/json"
     }
     
@@ -182,6 +183,8 @@ def send_omium_telemetry(stage_name, latency_ms=0, status="completed"):
         "name": stage_name,
         "status": status,
         "latency": float(latency_ms / 1000.0), # Convert to numerical float seconds for observability tools
+        "workflow_id": str(uuid.uuid4()),
+        "agent_id": str(uuid.uuid4()),
         "meta": {
             "target_role": st.session_state.get("role_title", "Backend Engineer"),
             "shortlisted_profile": st.session_state.get("top_candidate_name", "None")
@@ -549,9 +552,11 @@ elif current_page == "⚙️ Domain & Security Controls":
     st.subheader("🛡️ Stage 0 Mail Processing Domain Firewall Filter")
     st.write("Define corporate domains that are allowed to ingest requests automatically into your pipeline buffers.")
     
-    st.session_state["allowed_domains_filter"] = st.text_input(
+    # Global persistence pattern for domains list
+    st.text_input(
         "Authorized Domain Strings Whitelist (comma-separated):", 
-        value=st.session_state["allowed_domains_filter"]
+        value=st.session_state.get("allowed_domains_filter", "enterprise.com, gmail.com, unstop.news"),
+        key="allowed_domains_filter"
     )
     st.info(f"🔒 **Active System Rule Strategy:** Currently accepting inbound payloads exclusively containing: ` {st.session_state['allowed_domains_filter']} `")
 
@@ -559,14 +564,31 @@ elif current_page == "⚙️ Domain & Security Controls":
     st.subheader("🔗 Omium AI Gateway Integration")
     st.markdown("Sync your agent fleet metrics directly with your production dashboard telemetry cluster.")
     
-    st.session_state["omium_api_key"] = st.text_input(
+    # FIX: Native 'key' configuration keeps this variable locked in memory across page changes
+    st.text_input(
         "Omium API Token Vector:", 
-        value=st.session_state["omium_api_key"], 
+        value=st.session_state.get("omium_api_key", ""), 
         type="password",
-        placeholder="Enter your security token boundary matching your profile configurations..."
+        placeholder="Enter your security token boundary matching your profile configurations...",
+        key="omium_api_key"
     )
     st.caption("🌐 Acquire and manage your production access keys, endpoint keys, and live telemetry webhooks directly at [app.omium.ai/settings/api](https://app.omium.ai/settings/api)")
     
+    if st.button("📡 Test Omium Connection", type="secondary"):
+        with st.spinner("Pinging Omium infrastructure..."):
+            send_omium_telemetry(stage_name="Diagnostic Ping Test", latency_ms=150, status="testing")
+        st.rerun()
+
     # 📑 ACTIVE IN-APP TELEMETRY LOG VIEWER BLOCK
     st.markdown("##### 📝 Active Connection Diagnostic Packet Log Window:")
-    st.code(st.session_state["omium_log_cache"], language="text")
+    
+    # Pull the live response update
+    log_message = st.session_state.get("omium_log_cache", "No server response recorded yet.")
+    
+    # Enhanced UI feedback matching your app design lines
+    if "🟢" in log_message:
+        st.success(log_message)
+    elif "❌" in log_message or "⚠️" in log_message:
+        st.error(log_message)
+    else:
+        st.info(log_message)
