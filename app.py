@@ -443,7 +443,7 @@ elif current_page == "📢 2. Posting Agent":
         st.json({"platform": "Indeed", "description": st.session_state['jd_text'][:150] if st.session_state['jd_text'] else 'Pending compilation...'})
     if st.button("Trigger Live API Distribution", type="primary"):
         with st.spinner("Distributing payloads to external gateways..."):
-            API_GATEWAY_URL = "https://webhook.site/97bb1d9b-0f0b-4322-b183-fd91230428bd"
+            API_GATEWAY_URL = "https://webhook.site/13a137a9-353e-4c37-93dd-c7bff4ecf679"
             try:
                 requests.post(API_GATEWAY_URL, json={
                     "status": "LIVE_POSTING_SYNC",
